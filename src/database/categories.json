@@ -1,0 +1,22 @@
+[
+  {
+    "id": "category-1",
+    "name": "Sports"
+  },
+  {
+    "id": "category-2",
+    "name": "Technology"
+  },
+  {
+    "id": "category-3",
+    "name": "Health"
+  },
+  {
+    "id": "category-4",
+    "name": "Party"
+  },
+  {
+    "id": "category-5",
+    "name": "Tourism"
+  }
+]
