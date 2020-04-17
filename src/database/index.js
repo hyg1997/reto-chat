@@ -1,5 +1,6 @@
 import categories from "./categories";
 import {getItemInLocalStorage, setItemInLocalStorage} from "../utils";
+import {v1 as uuid} from "uuid";
 
 setItemInLocalStorage("categories", categories);
 
@@ -20,25 +21,29 @@ export const database = {
                 listener(newValue);
             }),
             get: () => collection,
+            where: query => collection.filter(query),
             doc: documentId => {
-
-                const document = collection.find(document => document.id === documentId) || null;
+                let document;
+                if (documentId) {
+                    document = collection.find(document => document.id === documentId) || null;
+                } else {
+                    document = {id: uuid()}
+                }
 
                 return ({
-                    get: () => document,
+                    get: () => documentId && document,
                     set: value => {
                         const dataType = typeof value;
 
                         if (!value || dataType !== "object") throw new Error(`Data can't be of type ${dataType}`);
 
-                        const remainingDocuments = collection.filter(document => document.id !== document);
+                        const remainingDocuments = collection.filter(document => document.id !== documentId);
 
                         const updatedDocument = {...document, ...value};
 
                         const updatedCollection = [...remainingDocuments, updatedDocument];
 
-                        localStorage.setItem(collectionId, JSON.stringify(updatedCollection, null, 2));
-
+                        setItemInLocalStorage(collectionId, updatedCollection);
                         return updatedDocument;
                     }
                 });

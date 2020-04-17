@@ -11,16 +11,13 @@ export const withConfiguration = Component => () => {
         const initializeConfig = async () => {
             const sessionUserId = sessionStorage.getItem("userId");
 
-            console.log("sessionUserId", sessionUserId);
-
             const user = database
                 .collection("users")
                 .doc(sessionUserId)
                 .get();
 
             await setGlobal({
-                user,
-                currentConfig: {}
+                user
             });
 
             moment.locale("es");

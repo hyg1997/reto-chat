@@ -1,6 +1,6 @@
 import React from "reactn";
 import {Redirect, Route, Switch} from "react-router-dom";
-import {Home} from "../pages";
+import {Chats} from "../pages";
 
 export const Routes = () => {
 
@@ -8,10 +8,10 @@ export const Routes = () => {
     return (
         <Switch>
             <Route exact
-                   path="/home"
-                   component={Home}
+                   path="/chats"
+                   component={Chats}
             />
-            <Redirect to="/home"/>
+            <Redirect to="/chats"/>
         </Switch>
     );
 };
