@@ -4,6 +4,7 @@ import styled from "styled-components";
 import {Link} from "react-router-dom";
 import {useEffect} from "react";
 import {database} from "../database";
+import {validateNickname} from "../utils";
 
 export const BaseLayout = props => {
     const [globalUser, setGlobalUser] = useGlobal("user");
@@ -28,11 +29,9 @@ export const BaseLayout = props => {
         .length;
 
     const editNickname = async () => {
-        if (nickname.length < 6) return alert("Nickname must contain at least 6 characters");
+        const validationError = validateNickname(nickname);
 
-        const regCheck = /^[A-Za-z0-9-]/;
-
-        if (!regCheck.test(nickname)) return alert("Nickname can only contain alphanumeric characters and hypehns(-)");
+        if (validationError) return alert(validationError);
 
         if (isNicknameExists(nickname)) return alert("Nickname already exists");
 
@@ -114,6 +113,7 @@ export const BaseLayout = props => {
                    onCancel={() => setIsVisibleNicknameModal(false)}
                    title="Update nickname">
                 <Input defaultValue={nickname}
+                       onPressEnter={editNickname}
                        onChange={event => setNickname(event.target.value)}/>
             </Modal>
         </Layout>
