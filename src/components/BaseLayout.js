@@ -1,19 +1,25 @@
 import React, {Fragment, useGlobal, useState} from "reactn";
 import {Icon, Input, Layout, Menu, Modal} from "antd";
 import styled from "styled-components";
-import {Link} from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
 import {useEffect} from "react";
 import {database} from "../database";
 import {validateNickname} from "../utils";
+import {get, orderBy} from "lodash";
 
 export const BaseLayout = props => {
     const [globalUser, setGlobalUser] = useGlobal("user");
     const [categories, setCategories] = useState([]);
+    const [users, setUsers] = useState([]);
     const [isVisibleNicknameModal, setIsVisibleNicknameModal] = useState(false);
     const [nickname, setNickname] = useState(globalUser.nickname);
     const [collapsed, setCollapsed] = useState(false);
+    const [usersCollapsed, setUsersCollapsed] = useState(false);
+
+    const history = useHistory();
 
     const toggleMenu = () => setCollapsed(prevCollapsed => !prevCollapsed);
+    const toggleUsers = () => setUsersCollapsed(prevUsersCollapsed => !prevUsersCollapsed);
 
     useEffect(() => {
         const _categories = database
@@ -22,6 +28,16 @@ export const BaseLayout = props => {
 
         setCategories(_categories);
     }, []);
+
+    useEffect(() => {
+        database
+            .collection("users")
+            .onSnapshot(snapshot => {
+                const orderedUsers = orderBy(snapshot, ["nickname"], "asc");
+
+                setUsers(orderedUsers.filter(user => user.id !== globalUser.id));
+            });
+    }, [globalUser.id]);
 
     const isNicknameExists = nickname => database
         .collection("users")
@@ -46,8 +62,34 @@ export const BaseLayout = props => {
         setIsVisibleNicknameModal(false);
     };
 
+    const openPrivateChat = userId => {
+        let chat = database
+            .collection("chats")
+            .where(chat => {
+                const users = get(chat, "users", []);
+
+                if (users.length > 2) return false;
+
+                if (!users.includes(userId)) return false;
+
+                return users.includes(globalUser.id);
+            });
+
+        if (chat.length) return history.push(`/chats/${chat[0].id}`);
+
+        chat = database
+            .collection("chats")
+            .doc()
+            .set({
+                messages: [],
+                users: [globalUser.id, userId]
+            });
+
+        history.push(`/chats/${chat.id}`);
+    };
+
     return (
-        <Layout>
+        <Layout style={{height: "100vh"}}>
             <Sider trigger={null}
                    collapsedWidth={0}
                    collapsible
@@ -98,15 +140,37 @@ export const BaseLayout = props => {
                         <span>ANONYMOUS CHAT - {props.title}</span>
                     </div>
                     <Nickname>
-                        {globalUser.nickname}
                         <Icon type="edit"
                               onClick={() => setIsVisibleNicknameModal(true)}/>
+                        {globalUser.nickname}
+                        <Trigger type={usersCollapsed ? "pic-right" : "menu"}
+                                 onClick={toggleUsers}/>
                     </Nickname>
                 </Header>
                 <Content>
                     {props.children}
                 </Content>
             </Layout>
+            <Sider trigger={null}
+                   collapsedWidth={0}
+                   collapsible
+                   theme="light"
+                   collapsed={usersCollapsed}
+                   direction="right">
+                <UserHeader>
+                    Users
+                </UserHeader>
+                <UsersContainer>
+                    {
+                        users.map(user =>
+                            <User key={user.id}
+                                  onClick={() => openPrivateChat(user.id)}>
+                                {user.nickname}
+                            </User>
+                        )
+                    }
+                </UsersContainer>
+            </Sider>
             <Modal visible={isVisibleNicknameModal}
                    destroyOnClose
                    onOk={editNickname}
@@ -122,9 +186,8 @@ export const BaseLayout = props => {
 
 const Sider = styled(Layout.Sider)`
   height: 100vh;
-  position: fixed;
   z-index: 900;
-  left: 0;
+  ${props => get(props, "direction", "left")}: 0;
   top: 0;
   box-shadow: 2px 3px 4px #444;
   padding-top: 4rem;
@@ -156,17 +219,38 @@ const Trigger = styled(Icon)`
 
 const Nickname = styled.div`
   display: inline-block;
-  padding-right: 1.5rem;
   font-size: 16px;
   i {
     font-weight: bold;
     font-size: 18px;
-    margin-left: 1rem;
+    margin-right: 0.5rem;
     cursor: pointer;
   }
 `;
 
 const Content = styled(Layout.Content)`
-  padding: 5.5rem 1.5rem 0;
+  padding: 5.5rem 1.5rem 1.5rem;
   background-color: white;
+`;
+
+const UserHeader = styled.h3`
+  padding: 1rem;
+  margin: 0;
+`;
+
+const UsersContainer = styled.div`
+  padding: 0 1rem 1rem;
+  overflow-y: scroll;
+  height: 90%;
+`;
+
+const User = styled.p`
+  padding-bottom: 0.5rem;
+  width: 100%;
+  margin: 0;
+  
+  :hover {
+    color: #1890ff;
+    cursor: pointer;
+  }
 `;

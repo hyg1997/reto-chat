@@ -5,7 +5,6 @@ import {BrowserRouter} from "react-router-dom";
 import {Routes} from "./routes";
 
 const App = () => {
-
     const GlobalStyle = createGlobalStyle`
       body {
         margin: 0;

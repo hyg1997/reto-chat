@@ -11,15 +11,21 @@ export const database = {
         const collection = getItemInLocalStorage(collectionId);
 
         return ({
-            onSnapshot: listener => window.addEventListener("storage", event => {
-                if (event.storageArea !== localStorage) return;
+            onSnapshot: listener => {
+                listener(collection);
 
-                if (event.key !== collectionId) return;
+                window.addEventListener("storage", event => {
+                    if (event.key === "forceEvent") return listener(getItemInLocalStorage(collectionId));
 
-                const newValue = JSON.parse(event.newValue);
+                    if (event.storageArea !== localStorage) return;
 
-                listener(newValue);
-            }),
+                    if (event.key !== collectionId) return;
+
+                    const newValue = JSON.parse(event.newValue);
+
+                    listener(newValue);
+                });
+            },
             get: () => collection,
             where: query => collection.filter(query),
             doc: documentId => {
