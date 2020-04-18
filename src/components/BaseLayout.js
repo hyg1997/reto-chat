@@ -82,6 +82,7 @@ export const BaseLayout = props => {
             .collection("chats")
             .doc()
             .set({
+                private: true,
                 messages: [],
                 users: [globalUser.id, userId],
                 lastTimeMessage: moment().format(dateFormat)
@@ -117,8 +118,7 @@ export const BaseLayout = props => {
                             categories.map(category =>
                                 <Menu.Item key={category.id}>
                                     <Link to={`/categories/${category.id}`}
-                                          type={collapsed ? "menu-unfold" : null}
-                                          onClick={toggleMenu}>
+                                          type={collapsed ? "menu-unfold" : null}>
                                         {category.name}
                                     </Link>
                                 </Menu.Item>

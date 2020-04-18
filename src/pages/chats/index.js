@@ -66,12 +66,14 @@ export const Chats = () => {
                                               </Fragment>
                                           }
                           />
-                          <h3>
-                              {renderCategory(chat.categoryId)}
-                          </h3>
-                          <h5>
-                              {moment(chat.lastTimeMessage, dateFormat).fromNow()}
-                          </h5>
+                          <div>
+                              <h3>
+                                  {renderCategory(chat.categoryId)}
+                              </h3>
+                              <h5>
+                                  {moment(chat.lastTimeMessage, dateFormat).fromNow()}
+                              </h5>
+                          </div>
                       </List.Item>
                   )}/>
         </BaseLayout>

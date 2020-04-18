@@ -1,6 +1,6 @@
 import React, {Fragment, useEffect, useGlobal, useState} from "reactn";
 import {Button, Icon, Input, List, Modal, Select} from "antd";
-import {Link, useParams} from "react-router-dom";
+import {Link, useHistory, useParams} from "react-router-dom";
 import moment from "moment";
 import {database} from "../../../database";
 import {BaseLayout} from "../../../components";
@@ -15,6 +15,7 @@ export const Category = () => {
     const [users, setUsers] = useState([]);
 
     const {categoryId} = useParams();
+    const history = useHistory();
 
     useEffect(() => {
         database
@@ -49,13 +50,15 @@ export const Category = () => {
             .collection("users")
             .get();
 
-        return users.map(user =>
-            <Select.Option key={user.id}
-                           label={user.nickname}
-                           value={user.id}>
-                {user.nickname}
-            </Select.Option>
-        );
+        return users
+            .filter(user => user.id !== globalUser.id)
+            .map(user =>
+                <Select.Option key={user.id}
+                               label={user.nickname}
+                               value={user.id}>
+                    {user.nickname}
+                </Select.Option>
+            );
     };
 
     const renderChatUsers = users => {
@@ -79,7 +82,7 @@ export const Category = () => {
 
         if (validationError) return alert(validationError);
 
-        if (users.length < 3) return alert("Select at least 3 Users");
+        if (users.length < 2) return alert("Select at least 3 Users");
 
         const _chat = database
             .collection("chats")
@@ -87,7 +90,7 @@ export const Category = () => {
             .set({
                 name: trimmedChatName,
                 messages: [],
-                users,
+                users: [...users, globalUser.id],
                 categoryId,
                 lastTimeMessage: moment().format(dateFormat)
             });
@@ -102,6 +105,8 @@ export const Category = () => {
         }));
 
         setIsVisibleCreateChatModal(false);
+
+        history.push(`/chats/${_chat.id}`);
     };
 
     return (

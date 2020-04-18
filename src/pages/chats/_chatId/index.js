@@ -1,6 +1,6 @@
 import React, {useEffect, useGlobal, useState} from "reactn";
 import {BaseLayout} from "../../../components";
-import {useParams} from "react-router";
+import {useHistory, useParams} from "react-router";
 import {Conversation} from "./Conversation";
 import {database} from "../../../database";
 
@@ -9,6 +9,7 @@ export const Chat = () => {
     const [title, setTitle] = useState("");
 
     const {chatId} = useParams();
+    const history = useHistory();
 
     useEffect(() => {
         const chat = database
@@ -16,7 +17,9 @@ export const Chat = () => {
             .doc(chatId)
             .get();
 
-        if (chat.users.length === 2) {
+        if (chat.private) {
+            if (!chat.users.includes(globalUser.id)) return history.goBack();
+
             const userId = chat.users.find(userId => userId !== globalUser.id);
 
             const user = database
@@ -26,6 +29,15 @@ export const Chat = () => {
 
             return setTitle(`Message to ${user.nickname}`);
         }
+
+        database
+            .collection("chats")
+            .doc(chat.id)
+            .set({
+                users: [...chat.users.filter(user => user.id !== globalUser.id), globalUser.id]
+            });
+
+        setTitle(chat.name)
     }, [chatId, globalUser.id]);
 
     return (
