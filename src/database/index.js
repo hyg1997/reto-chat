@@ -2,7 +2,7 @@ import categories from "./categories";
 import {getItemInLocalStorage, setItemInLocalStorage} from "../utils";
 import {v1 as uuid} from "uuid";
 
-setItemInLocalStorage("categories", categories);
+!getItemInLocalStorage("categories") && setItemInLocalStorage("categories", categories);
 
 export const database = {
     collection: collectionId => {

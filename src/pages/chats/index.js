@@ -3,18 +3,20 @@ import {BaseLayout} from "../../components";
 import {List} from "antd";
 import {database} from "../../database";
 import {Link} from "react-router-dom";
+import moment from "moment";
+import {dateFormat} from "../../utils";
 
 export const Chats = () => {
     const [globalUser] = useGlobal("user");
-    const [chats, setChats] = useState();
+    const [chats, setChats] = useState([]);
 
     useEffect(() => {
         const _chats = database
             .collection("chats")
-            .where(chat => chat.users.includes(globalUser.id))
+            .where(chat => chat.users.includes(globalUser.id));
 
         setChats(_chats);
-    }, []);
+    }, [globalUser.id]);
 
     const renderChatUsers = users => {
         const mappedUsers = users
@@ -29,6 +31,18 @@ export const Chats = () => {
             });
 
         return mappedUsers.join(", ");
+    };
+
+    const renderCategory = categoryId => {
+        if (!categoryId) return;
+
+        const category = database
+            .collection("categories")
+            .doc(categoryId)
+            .get();
+
+
+        return category.name;
     };
 
     return (
@@ -52,9 +66,12 @@ export const Chats = () => {
                                               </Fragment>
                                           }
                           />
-                          <div>
-                              Category
-                          </div>
+                          <h3>
+                              {renderCategory(chat.categoryId)}
+                          </h3>
+                          <h5>
+                              {moment(chat.lastTimeMessage, dateFormat).fromNow()}
+                          </h5>
                       </List.Item>
                   )}/>
         </BaseLayout>

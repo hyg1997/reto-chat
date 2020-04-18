@@ -47,7 +47,6 @@ export const Conversation = props => {
                 messages: newValue
             });
 
-
         window.dispatchEvent(new StorageEvent("storage", {
             key: "forceEvent"
         }));

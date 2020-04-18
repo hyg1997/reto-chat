@@ -4,8 +4,9 @@ import styled from "styled-components";
 import {Link, useHistory} from "react-router-dom";
 import {useEffect} from "react";
 import {database} from "../database";
-import {validateNickname} from "../utils";
+import {dateFormat, validateNickname} from "../utils";
 import {get, orderBy} from "lodash";
+import moment from "moment";
 
 export const BaseLayout = props => {
     const [globalUser, setGlobalUser] = useGlobal("user");
@@ -82,7 +83,8 @@ export const BaseLayout = props => {
             .doc()
             .set({
                 messages: [],
-                users: [globalUser.id, userId]
+                users: [globalUser.id, userId],
+                lastTimeMessage: moment().format(dateFormat)
             });
 
         history.push(`/chats/${chat.id}`);

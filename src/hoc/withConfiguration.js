@@ -1,6 +1,4 @@
 import React, {setGlobal, useEffect, useState} from "reactn";
-import moment from "moment"
-import "moment/locale/es";
 import {database} from "../database";
 import {withAuthentication} from "./withAuthentication";
 
@@ -19,8 +17,6 @@ export const withConfiguration = Component => () => {
             await setGlobal({
                 user
             });
-
-            moment.locale("es");
 
             setIsLoadingConfig(false);
         };

@@ -7,3 +7,9 @@ export const validateNickname = nickname => {
 
     return null;
 };
+
+export const validateChatName = chatName => {
+    if (chatName.length < 6) return "Chat name must contain at least 6 characters";
+
+    return null;
+};
