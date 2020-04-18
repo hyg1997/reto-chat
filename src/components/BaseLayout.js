@@ -19,6 +19,9 @@ export const BaseLayout = props => {
 
     const history = useHistory();
 
+    const route = window.location.href;
+    const currentKey = route.split("/")[3];
+
     const toggleMenu = () => setCollapsed(prevCollapsed => !prevCollapsed);
     const toggleUsers = () => setUsersCollapsed(prevUsersCollapsed => !prevUsersCollapsed);
 
@@ -99,7 +102,7 @@ export const BaseLayout = props => {
                    collapsed={collapsed}>
                 <Menu theme="dark"
                       mode="inline"
-                      defaultSelectedKeys={["chats"]}
+                      defaultSelectedKeys={[currentKey]}
                       defaultOpenKeys={["categories"]}>
                     <Menu.Item key="chats">
                         <Link to="/chats">
