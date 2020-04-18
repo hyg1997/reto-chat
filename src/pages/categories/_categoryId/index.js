@@ -1,9 +1,9 @@
 import React, {Fragment, useEffect, useGlobal, useState} from "reactn";
-import {Button, Icon, Input, List, Modal, Select} from "antd";
+import {Button, Icon, Input, Modal, Select} from "antd";
 import {Link, useHistory, useParams} from "react-router-dom";
 import moment from "moment";
 import {database} from "../../../database";
-import {BaseLayout} from "../../../components";
+import {BaseLayout, List} from "../../../components";
 import {dateFormat, validateChatName} from "../../../utils";
 import {get} from "lodash";
 
@@ -118,6 +118,7 @@ export const Category = () => {
                 {renderCategory(categoryId)} Chat
             </Button>
             <List size="large"
+                  height="95%"
                   dataSource={chats}
                   renderItem={chat => (
                       <List.Item key={chat.id}

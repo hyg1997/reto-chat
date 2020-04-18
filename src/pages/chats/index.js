@@ -1,21 +1,35 @@
 import React, {Fragment, useEffect, useGlobal, useState} from "reactn";
-import {BaseLayout} from "../../components";
-import {List} from "antd";
+import {BaseLayout, List, Title} from "../../components";
 import {database} from "../../database";
-import {Link} from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
 import moment from "moment";
 import {dateFormat} from "../../utils";
+import {Select} from "antd";
+import {get} from "lodash";
 
 export const Chats = () => {
     const [globalUser] = useGlobal("user");
+    const [userChats, setUserChats] = useState([]);
     const [chats, setChats] = useState([]);
+    const [users, setUsers] = useState([]);
+
+    const history = useHistory();
 
     useEffect(() => {
         const _chats = database
             .collection("chats")
-            .where(chat => chat.users.includes(globalUser.id));
+            .get();
+
+        const _userChats = _chats
+            .filter(chat => chat.users.includes(globalUser.id));
+
+        const _users = database
+            .collection("users")
+            .where(user => user.id !== globalUser.id);
 
         setChats(_chats);
+        setUserChats(_userChats);
+        setUsers(_users);
     }, [globalUser.id]);
 
     const renderChatUsers = users => {
@@ -45,9 +59,76 @@ export const Chats = () => {
         return category.name;
     };
 
+    const openPrivateChat = userId => {
+        let chat = database
+            .collection("chats")
+            .where(chat => {
+                const users = get(chat, "users", []);
+
+                if (users.length > 2) return false;
+
+                if (!users.includes(userId)) return false;
+
+                return users.includes(globalUser.id);
+            });
+
+        if (chat.length) return history.push(`/chats/${chat[0].id}`);
+
+        chat = database
+            .collection("chats")
+            .doc()
+            .set({
+                private: true,
+                messages: [],
+                users: [globalUser.id, userId],
+                lastTimeMessage: moment().format(dateFormat)
+            });
+
+        history.push(`/chats/${chat.id}`);
+    };
+
     return (
         <BaseLayout title="Chats">
-            <List dataSource={chats}
+            <Title>
+                Search Groups and Users
+            </Title>
+            <Select showSearch
+                    placeholder="Search user or group"
+                    autoClearSearchValue
+                    onSelect={(value, option) =>
+                        option.props.type === "chat" ? history.push(`/chats/${value}`) : openPrivateChat(value)
+                    }
+                    optionFilterProp="label"
+                    style={{width: "100%", marginBottom: "1rem"}}>
+                {
+                    chats
+                        .filter(chat => !chat.private)
+                        .map(chat =>
+                            <Select.Option key={chat.id}
+                                           type="chat"
+                                           label={chat.name}
+                                           value={chat.id}>
+                                <b>Group: </b>{chat.name}
+                            </Select.Option>
+                        )
+                }
+                {
+                    users
+                        .map(user =>
+                            <Select.Option key={user.id}
+                                           type="user"
+                                           label={user.nickname}
+                                           value={user.id}>
+                                <b>User: </b>{user.nickname}
+                            </Select.Option>
+                        )
+                }
+            </Select>
+            <Title>
+                My Chats
+            </Title>
+            <List dataSource={userChats}
+                  height="80%"
                   renderItem={chat => (
                       <List.Item key={chat.id}>
                           <List.Item.Meta title={

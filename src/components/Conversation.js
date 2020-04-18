@@ -1,9 +1,9 @@
 import React, {useEffect, useGlobal, useState} from "reactn";
 import styled from "styled-components";
-import {database} from "../../../database";
+import {database} from "../database";
 import {Icon, Input, Modal} from "antd";
 import moment from "moment";
-import {dateFormat} from "../../../utils";
+import {dateFormat} from "../utils";
 import {get} from "lodash";
 
 export const Conversation = props => {

@@ -1,7 +1,6 @@
 import React, {useEffect, useGlobal, useState} from "reactn";
-import {BaseLayout} from "../../../components";
+import {BaseLayout, Conversation} from "../../../components";
 import {useHistory, useParams} from "react-router";
-import {Conversation} from "./Conversation";
 import {database} from "../../../database";
 
 export const Chat = () => {
@@ -38,7 +37,7 @@ export const Chat = () => {
             });
 
         setTitle(chat.name)
-    }, [chatId, globalUser.id]);
+    }, [chatId, globalUser.id, history]);
 
     return (
         <BaseLayout title={title}>
